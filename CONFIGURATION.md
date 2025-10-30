@@ -14,6 +14,7 @@ This application requires the following environment variables to be set for data
   - Example: `postgres`
 
 - `DB_PASSWORD`: Database password
+  - **Important**: This is a REQUIRED environment variable with no default value for security reasons
   - **Important**: Never commit this value to version control
 
 ### Server Configuration
