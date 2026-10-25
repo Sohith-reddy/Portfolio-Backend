@@ -1,63 +1,47 @@
 package com.studentpractice.portfoliobackend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
-
-
-import java.time.LocalTime;
 
 @Entity
 @Table(name = "visits")
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
 public class VisitEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(length = 64)
     private String ipAddress;
+
+    @Column(length = 100)
     private String city;
+
+    @Column(length = 100)
+    private String region;
+
+    @Column(length = 100)
+    private String country;
+
+    @Column(length = 100)
     private String ref;
-    private LocalDateTime visitedTime;
 
-    public Long getId() {
-        return id;
-    }
+    @Column(length = 255)
+    private String page;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @Column(length = 500)
+    private String referrer;
 
-    public String getIpAddress() {
-        return ipAddress;
-    }
+    @Column(length = 500)
+    private String userAgent;
 
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public LocalDateTime getVisitedTime() {
-        return visitedTime;
-    }
-
-    public void setVisitedTime(LocalDateTime visitedTime) {
-        this.visitedTime = visitedTime;
-    }
-
-    public String getRef() {
-        return ref;
-    }
-
-    public void setRef(String ref) {
-        this.ref = ref;
-    }
+    // Mapped to the column name used by earlier versions so existing rows keep working.
+    @Column(name = "visited_time")
+    private LocalDateTime visitedAt;
 }
