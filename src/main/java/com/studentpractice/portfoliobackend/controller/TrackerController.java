@@ -1,43 +1,40 @@
 package com.studentpractice.portfoliobackend.controller;
 
-
+import com.studentpractice.portfoliobackend.dto.TrackRequest;
+import com.studentpractice.portfoliobackend.dto.TrackResponse;
 import com.studentpractice.portfoliobackend.model.VisitEntity;
-import com.studentpractice.portfoliobackend.repository.VisitRepository;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.studentpractice.portfoliobackend.service.VisitService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/track")
-@CrossOrigin(origins = "*")
-@AllArgsConstructor
-@NoArgsConstructor
 public class TrackerController {
-    @Autowired
-    private VisitRepository visitRepository;
+    private final VisitService visitService;
+
+    public TrackerController(VisitService visitService) {
+        this.visitService = visitService;
+    }
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> trackVisit(@RequestBody VisitEntity visitEntity) {
-        try {
-            visitEntity.setVisitedTime(LocalDateTime.now());
-            visitRepository.save(visitEntity);
+    @ResponseStatus(HttpStatus.CREATED)
+    public TrackResponse trackVisit(@Valid @RequestBody TrackRequest request, HttpServletRequest httpRequest) {
+        VisitEntity visit = visitService.recordVisit(
+                request,
+                clientIp(httpRequest),
+                httpRequest.getHeader(HttpHeaders.USER_AGENT));
+        return new TrackResponse(visit.getId(), "Visit tracked successfully");
+    }
 
-            Map<String, Object> mp = new HashMap<>();
-            mp.put("visit", visitEntity);
-            mp.put("message", "Visit Tracked Successfully");
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(mp);
-        } catch (Exception e) {
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    // Hosting platforms terminate TLS at a proxy, so the real client is the first X-Forwarded-For entry.
+    private static String clientIp(HttpServletRequest request) {
+        String forwardedFor = request.getHeader("X-Forwarded-For");
+        if (forwardedFor != null && !forwardedFor.isBlank()) {
+            return forwardedFor.split(",")[0].trim();
         }
+        return request.getRemoteAddr();
     }
 }
